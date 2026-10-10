@@ -368,6 +368,11 @@ section[hidden]{display:none}
 .cgrid b{position:absolute;top:8px;inset-inline-start:8px;background:rgba(255,255,255,.88);border-radius:99px;padding:1px 9px;font-size:12px;font-weight:700}
 #lb .btn{display:none;position:absolute;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);left:16px;right:16px;margin:auto;max-width:340px;text-align:center;background:#25d366;color:#0b2e13}
 #lb.q .btn{display:block}#lb.q img{max-height:calc(100% - 76px)}
+/* v4 fixes: bigger phone in preview, no page showing through the overlays (no font changes) */
+.sheet .pks{height:min(44svh,400px)}
+.sheet .pks img{height:calc(min(44svh,400px)*.96);width:auto;max-width:94%;object-fit:contain}
+body:has(#pop.on) #wall,body:has(#ai.on) #wall{visibility:hidden}
+body:has(#ai.on)>*:not(#ai):not(#pop){visibility:hidden}
 </style></head><body><svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="tt" viewBox="0 0 24 24"><path fill="currentColor" d="M16.6 2h-3.2v13.1a2.7 2.7 0 1 1-2.7-2.7c.3 0 .6.1.9.1V9.2a6 6 0 1 0 5 5.9V8.6a7.300 7.300 0 0 0 4.200 1.400V6.800A4.200 4.200 0 0 1 16.600 2z"/></symbol><symbol id="fbk" viewBox="0 0 24 24"><path fill="currentColor" d="M13.5 21v-7.500h2.500l.4-3h-2.900V8.700c0-.9.3-1.500 1.500-1.500h1.500V4.500c-.3 0-1.200-.1-2.200-.1-2.200 0-3.700 1.300-3.700 3.800v2.300H8v3h2.600V21z"/></symbol></svg>
 <nav id="nav"><b><img class="lgo" src="logo.png" alt="" width="30" height="30">باب الحارة <span class="sub" style="font-weight:300;font-size:12px;opacity:.6">Bab Alhara</span></b>
 <div class="ls" id="ls"><a href="#/home" data-a="الرئيسية">Home</a><a href="#/shop" data-a="المتجر">Shop</a><a href="#/fix" data-a="الصيانة">Repair</a><a href="#/about" data-a="محلنا">Our store</a></div>
@@ -543,7 +548,7 @@ const ordMsg=(en,ar)=>wa(`Hi Bab Alhara, I'd like to order:\n📱 ${en}\n🔢 Qu
 function orderNow(){const ip=CUR===IP,m=CUR[pm],c=m[1][pcx],multi=ip||m[1].length>1;ordMsg(m[0]+(multi?' ('+c[0]+')':''),(ip?m[0]:m[2])+(multi?' ('+lb(c)+')':''))}
 const ordC=(k,i)=>{const m=LISTS[k][i];ordMsg(m[0],k=='iphone'?m[0]:m[2])};
 /* ===== assistant: guided buttons + optional free-text AI ===== */
-const AI_CFG={proxy:'https://bab-alhara.lanaderayy0.workers.dev/',key:'',model:'gemini-2.5-flash'}; /* paste your Cloudflare worker URL in proxy to switch on free-text AI (see gemini-worker.js) */
+const AI_CFG={proxy:'https://bab-alhara.lanaderayy0.workers.dev',key:'',model:'gemini-2.5-flash'}; /* paste your Cloudflare worker URL in proxy to switch on free-text AI (see gemini-worker.js) */
 const aiOn=()=>!!(AI_CFG.proxy||AI_CFG.key),aiH=[];let aiBusy=false;
 const aiEsc=s=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const aiFmt=s=>aiEsc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>');
