@@ -543,7 +543,7 @@ const ordMsg=(en,ar)=>wa(`Hi Bab Alhara, I'd like to order:\n📱 ${en}\n🔢 Qu
 function orderNow(){const ip=CUR===IP,m=CUR[pm],c=m[1][pcx],multi=ip||m[1].length>1;ordMsg(m[0]+(multi?' ('+c[0]+')':''),(ip?m[0]:m[2])+(multi?' ('+lb(c)+')':''))}
 const ordC=(k,i)=>{const m=LISTS[k][i];ordMsg(m[0],k=='iphone'?m[0]:m[2])};
 /* ===== assistant: guided buttons + optional free-text AI ===== */
-const AI_CFG={proxy:'',key:'',model:'gemini-2.5-flash'}; /* paste your Cloudflare worker URL in proxy to switch on free-text AI (see gemini-worker.js) */
+const AI_CFG={proxy:'https://bab-alhara.lanaderayy0.workers.dev/',key:'',model:'gemini-2.5-flash'}; /* paste your Cloudflare worker URL in proxy to switch on free-text AI (see gemini-worker.js) */
 const aiOn=()=>!!(AI_CFG.proxy||AI_CFG.key),aiH=[];let aiBusy=false;
 const aiEsc=s=>s.replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const aiFmt=s=>aiEsc(s).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>');
