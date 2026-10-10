@@ -16,12 +16,12 @@ function chrome() {
   const hl = NAV.filter(n => n[3]).map(n => n[0] === "shop.html" ? mega : mk([n])).join("");
   document.body.insertAdjacentHTML("afterbegin", `
   <div id="ann" role="region"><span data-ar="${CONFIG.announcement.ar}" data-en="${CONFIG.announcement.en}"></span><button aria-label="Close" onclick="this.parentNode.remove()">×</button></div>
-  <header class="site"><div class="wrap bar">
+  <header class="site"><div class="nav">
     <a class="brand" href="index.html"><img src="logo.png" alt="Bab Alhara logo" width="46" height="46"><span data-ar="${CONFIG.name.ar}" data-en="${CONFIG.name.en}"></span></a>
     <nav class="main" id="nav" aria-label="Main">${hl}</nav>
     <div class="tools"><button class="lang" id="sBtn" aria-label="Search">🔍</button><a class="lang" href="cart.html" aria-label="Order list">🛒 <span class="cc num">0</span></a><button class="lang" id="langBtn" aria-label="Language"></button>
     <a class="btn btn-wa" href="${wa("")}"  data-ar="واتساب" data-en="WhatsApp"></a>
-    <button id="burger" aria-label="Menu" aria-expanded="false">☰</button></div></div></div><div class="wrap" id="sbox" hidden><input id="sq" type="search" placeholder="Search / ابحث" aria-label="Search" style="width:100%"><div id="sres"></div></div></header>`);
+    <button id="burger" aria-label="Menu" aria-expanded="false">☰</button></div></div></div><div id="sbox" hidden><input id="sq" type="search" placeholder="Search / ابحث" aria-label="Search" style="width:100%"><div id="sres"></div></div></header>`);
   document.body.insertAdjacentHTML("beforeend", `
   <footer class="site"><div class="wrap"><div class="fgrid">
     <div><img src="logo.png" alt="" width="64" height="64" style="background:#fff;border-radius:50%;margin-bottom:10px"><p data-ar="موبايلك في إيدين أمينة" data-en="Your phone is in trusted hands"></p></div>
@@ -35,7 +35,8 @@ function chrome() {
   document.getElementById("sq").oninput = e => { const q = e.target.value.trim().toLowerCase();
     document.getElementById("sres").innerHTML = q ? PRODUCTS.filter(p => (p.name.en + p.brand).toLowerCase().includes(q)).slice(0, 8).map(p => `<a class="sr" href="product.html?id=${p.id}">${L(p.name)}</a>`).join("") || `<p>${T("لا نتائج", "No results")}</p>` : ""; };
   updCount();
-  document.getElementById("burger").onclick = e => { const o = document.getElementById("nav").classList.toggle("open"); e.currentTarget.setAttribute("aria-expanded", o); };
+  document.getElementById("burger").onclick = e => { const o = document.getElementById("nav").classList.toggle("open"); document.body.classList.toggle("lock", o); e.currentTarget.setAttribute("aria-expanded", o); };
+  document.querySelectorAll("#nav a").forEach(a => a.addEventListener("click", () => { document.getElementById("nav").classList.remove("open"); document.body.classList.remove("lock"); }));
   document.getElementById("langBtn").onclick = () => { lang = lang === "ar" ? "en" : "ar"; try { localStorage.setItem("lang", lang); } catch (e) {} apply(); };
 }
 function apply() {
@@ -43,7 +44,7 @@ function apply() {
   document.querySelectorAll("[data-ar]").forEach(el => el.textContent = el.dataset[lang]);
   document.querySelectorAll("[data-ph-ar]").forEach(el => el.placeholder = el.dataset[lang === "ar" ? "phAr" : "phEn"]);
   document.getElementById("langBtn").textContent = lang === "ar" ? "EN" : "عربي";
-  if (page === "cart") renderCart(); if (page === "compare") renderCompare(); if (page === "guides") renderGuides(); if (page === "guide") renderGuide(); if (page === "cat") renderCat(); if (page === "shop") renderShop(); if (page === "home") renderFeatured(); if (page === "product") renderProduct();
+  if (page === "cart") renderCart(); if (page === "compare") renderCompare(); if (page === "guides") renderGuides(); if (page === "guide") renderGuide(); if (page === "cat") renderCat(); if (page === "shop") renderShop(); if (page === "home") renderHome(); if (page === "product") renderProduct();
 }
 const T = (ar, en) => lang === "ar" ? ar : en;
 const priceTxt = p => p.price ? `${p.price.toLocaleString("en-US")} ${T("ج.م", "EGP")}${p.demo ? ` <small class="todo">${T("سعر تجريبي", "demo price")}</small>` : ""}` : T("يبدأ من: [السعر]", "Starting from: [price]");
@@ -63,7 +64,33 @@ function card(p) {
   <h3><a href="product.html?id=${p.id}">${L(p.name)}</a></h3><p class="price">${priceTxt(p)}</p>
   <div class="acts"><a class="btn btn-wa" href="${wa((T("أهلاً، عايز أسأل عن: ", "Hi, I'd like to ask about: ")) + L(p.name))}">${T("اسأل على واتساب", "Ask on WhatsApp")}</a><button class="btn btn-o" onclick="addCart('${p.id}',this)">${T("ضيف للطلب", "Add to order")}</button></div></article>`;
 }
-function renderFeatured() { document.getElementById("featured").innerHTML = PRODUCTS.slice(0, 4).map(card).join(""); }
+const CPAGE = { iphone: "iphone", android: "android", tablet: "tablets", laptop: "laptops", accessory: "accessories" };
+function renderHome() {
+  const pick = ks => ks.map(k => PRODUCTS.find(p => p.image.includes(k))).filter(Boolean);
+  document.getElementById("featured").innerHTML = pick(["iphone-17-pro-max", "iphone-16-pro-black", "iphone-15-pro-max", "samsung-s26", "xiaomi-15-ultra", "ipad-pro", "laptop-mac", "earbuds-apple"]).map(card).join("");
+  const tiles = PRODUCTS.filter(p => p.cat === "iphone").flatMap(p => p.gallery.map(g => ({ p, g, n: (p.name.en.match(/iPhone (\d+)/) || [])[1] })));
+  const wall = document.getElementById("wall"), cur = window.wg || "";
+  wall.innerHTML = tiles.filter(t => !cur || t.n === cur).map(t => `<a class="tile" href="product.html?id=${t.p.id}" title="${L(t.p.name)} ${t.g.name}"><img src="${t.g.src}" alt="${L(t.p.name)} ${t.g.name}" loading="lazy"></a>`).join("");
+  const pl = document.getElementById("wallPills");
+  pl.innerHTML = [["", T("الكل", "All")], ...["17", "16", "15", "14", "13", "12", "11"].map(n => [n, "iPhone " + n])].map(x => `<button class="pill ${cur === x[0] ? "on" : ""}" data-g="${x[0]}">${x[1]}</button>`).join("");
+  pl.querySelectorAll("button").forEach(b => b.onclick = () => { window.wg = b.dataset.g; renderHome(); });
+  const reps = { iphone: "iphone-17-pro-max-deep-blue", android: "samsung-s26-ultra", tablet: "ipad-pro", laptop: "laptop-mac-open", accessory: "earbuds-apple-buds" };
+  document.getElementById("bento").innerHTML = CATEGORIES.map((c, i) => { const hit = PRODUCTS.flatMap(p => p.gallery).find(g => g.src.includes(reps[c.id])) || PRODUCTS.find(p => p.cat === c.id).gallery[0];
+    return `<a class="bc b${i + 1}" href="${CPAGE[c.id]}.html"><b>${L(c)}</b><small>${PRODUCTS.filter(p => p.cat === c.id).length} ${T("منتج", "items")}</small><img src="${hit.src}" alt="${L(c)}" loading="lazy"></a>`; }).join("");
+}
+function initFx() {
+  document.documentElement.classList.add("js");
+  const nav = document.querySelector(".nav"), root = document.documentElement.style;
+  const onScroll = () => { nav.classList.toggle("s", scrollY > 20); root.setProperty("--sc", Math.min(scrollY / innerHeight, 1.2).toFixed(3)); };
+  addEventListener("scroll", onScroll, { passive: true }); onScroll();
+  const st = document.querySelector(".stage");
+  if (st) { st.addEventListener("pointermove", e => { const r = st.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5;
+      st.style.setProperty("--ry", (x * 26).toFixed(1) + "deg"); st.style.setProperty("--rx", (-y * 18).toFixed(1) + "deg"); st.style.setProperty("--px", x.toFixed(2)); st.style.setProperty("--py", y.toFixed(2)); });
+    st.addEventListener("pointerleave", () => ["--ry", "--rx"].forEach(k => st.style.setProperty(k, "0deg"))); }
+  const sel = page === "home" ? ".rv" : "main .wrap > *";
+  const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { threshold: .01, rootMargin: "0px 0px -4% 0px" });
+  document.querySelectorAll(sel).forEach((el, i) => { el.classList.add("rv"); el.style.setProperty("--d", (i % 4) * .08 + "s"); io.observe(el); });
+}
 function renderShop() {
   const f = document.getElementById("filters"), q = id => (document.getElementById(id) || {}).value || "";
   if (!f.dataset.built) {
@@ -136,5 +163,4 @@ function contactForm() {
     location.href = wa(`${T("الاسم", "Name")}: ${d.get("n")}\n${T("الهاتف", "Phone")}: ${d.get("p")}\n${T("الرسالة", "Message")}: ${d.get("m")}`); };
 }
 chrome(); apply(); contactForm(); waForms(); carousel();
-const io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && e.target.classList.add("in")));
-document.querySelectorAll(".fade").forEach(el => io.observe(el));
+initFx();
